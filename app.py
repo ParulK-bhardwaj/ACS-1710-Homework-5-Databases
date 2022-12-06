@@ -115,15 +115,15 @@ def edit(plant_id):
             'name': name,
             'variety': variety,
             'photo': photo,
-            'date_planted': date_planted
+            'date_planted': date_planted,
         }
-        # udated_fields = { }
-        edit_plant = mongo.db.plants.update_one({"_id": ObjectId(plant_id)})
+
+        searchParam = {'_id': ObjectId(plant_id)}
+        changeParam = {'$set' : edit_plant}
+        edit_plant = mongo.db.plants.update_one(searchParam, changeParam)
         return redirect(url_for('detail', plant_id=plant_id))
     else:
-        # TODO: Make a `find_one` database call to get the plant object with the
-        # passed-in _id.
-        plant_to_show = ''
+        plant_to_show = mongo.db.plants.find_one({"_id": ObjectId(plant_id)})
 
         context = {
             'plant': plant_to_show
@@ -133,14 +133,11 @@ def edit(plant_id):
 
 @app.route('/delete/<plant_id>', methods=['POST'])
 def delete(plant_id):
-    # TODO: Make a `delete_one` database call to delete the plant with the given
-    # id.
 
-    # TODO: Also, make a `delete_many` database call to delete all harvests with
-    # the given plant id.
-
-    return redirect(url_for('plants_list'))
+        searchParam = {'_id': ObjectId(plant_id)}
+        mongo.db.plants.delete_one(searchParam)
+        mongo.db.harvests.delete_many({"plant_id": plant_id})
+        return redirect(url_for('plants_list'))     
 
 if __name__ == '__main__':
     app.run(debug=True)
-
